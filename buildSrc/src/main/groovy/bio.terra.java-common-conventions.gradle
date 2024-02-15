@@ -1,0 +1,110 @@
+plugins {
+    id 'idea'
+    id 'jacoco'
+    id 'java'
+
+    id 'com.diffplug.spotless'
+    id 'com.github.spotbugs'
+    id 'org.hidetake.swagger.generator'
+}
+
+boolean isCiServer = System.getenv().containsKey("CI")
+
+if (!isCiServer) {
+    tasks.withType(JavaExec).configureEach {
+        systemProperty 'spring.profiles.include', 'human-readable-logging'
+    }
+    tasks.withType(Test).configureEach {
+        systemProperty 'spring.profiles.include', 'human-readable-logging'
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    maven {
+        // Terra proxy for maven central
+        url 'https://broadinstitute.jfrog.io/broadinstitute/maven-central/'
+    }
+    mavenCentral()
+    maven {
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-release/'
+    }
+    maven {
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
+    }
+}
+
+dependencies {
+    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.7.2'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.0'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.47'
+
+    implementation 'org.slf4j:slf4j-api'
+
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+
+    var openTelemetryVersion = '1.32.0'
+    implementation "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}"
+    implementation "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}"
+    implementation "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}"
+    implementation "io.opentelemetry:opentelemetry-exporter-logging:${openTelemetryVersion}"
+    implementation "io.opentelemetry.semconv:opentelemetry-semconv:1.21.0-alpha"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-webmvc-6.0:${openTelemetryVersion}-alpha"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:${openTelemetryVersion}"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:${openTelemetryVersion}-alpha"
+    implementation "com.google.cloud.opentelemetry:exporter-trace:0.25.2"
+
+    implementation 'bio.terra:terra-common-lib:0.1.5-SNAPSHOT'
+    implementation 'bio.terra:datarepo-client:1.349.0-SNAPSHOT'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+version = gradle.releaseVersion
+group = 'bio.terra'
+
+spotless {
+    java {
+        targetExclude "${buildDir}/**"
+        targetExclude "**/swagger-code/**"
+        googleJavaFormat()
+    }
+}
+
+// Run spotless check when running in github actions, otherwise run spotless apply.
+compileJava {
+    if (isCiServer) {
+        dependsOn(spotlessCheck)
+    } else {
+        dependsOn(spotlessApply)
+    }
+}
+
+// Spotbugs configuration
+spotbugs {
+    reportLevel = 'high'
+    effort = 'max'
+}
+spotbugsMain {
+    reports {
+        if (isCiServer) {
+            sarif.enabled = true
+        } else {
+            html.enabled = true
+        }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        // sonar requires XML coverage output to upload coverage data
+        xml.required = true
+    }
+}

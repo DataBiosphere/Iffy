@@ -1,0 +1,52 @@
+
+name: Trivy
+on: workflow_dispatch
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Build all projects without running tests
+        run: ./gradlew --build-cache build -x test -x spotlessCheck
+
+      - name: Construct docker image name and tag
+        id: image-name
+        run: |
+          echo "name=trivy-local-testing-image" >> $GITHUB_OUTPUT
+
+      - name: Build image locally with jib
+        run: |
+          ./gradlew --build-cache :service:jibDockerBuild \
+            --image=${{ steps.image-name.outputs.name }} \
+            -Djib.console=plain
+
+      - name: Run Trivy vulnerability scanner
+        uses: broadinstitute/dsp-appsec-trivy-action@v1
+        with:
+          image: ${{ steps.image-name.outputs.name }}
+
+
+  # report workflow status in slack
+  # see https://docs.google.com/document/d/1G6-whnNJvON6Qq1b3VvRJFC7M9M-gu2dAVrQHDyp9Us/edit?usp=sharing
+  report-workflow:
+    uses: broadinstitute/sherlock/.github/workflows/client-report-workflow.yaml@main
+    with:
+      # Channels to notify upon workflow success or failure
+      notify-slack-channels-upon-workflow-completion: '#dsp-feature-flags'
+
+      # Channels to notify upon workflow success only
+      # notify-slack-channels-upon-workflow-success: "#channel-here"
+
+      # Channels to notify upon workflow failure only
+      # notify-slack-channels-upon-workflow-failure: "#channel-here"
+    permissions:
+      id-token: 'write'

@@ -1,0 +1,4 @@
+rootProject.name = 'Iffy'
+include('service', 'client', 'integration')
+
+gradle.ext.releaseVersion = '0.17.0'
