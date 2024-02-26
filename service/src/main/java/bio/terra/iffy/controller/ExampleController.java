@@ -6,7 +6,6 @@ import bio.terra.common.iam.SamUserFactory;
 import bio.terra.iffy.api.ExampleApi;
 import bio.terra.iffy.config.SamConfiguration;
 import bio.terra.iffy.iam.SamService;
-import bio.terra.iffy.model.Example;
 import bio.terra.iffy.service.ExampleService;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
@@ -47,21 +46,6 @@ public class ExampleController implements ExampleApi {
   private SamUser getUser() {
     // this automatically checks if the user is enabled
     return this.samUserFactory.from(request, samConfiguration.basePath());
-  }
-
-  /** Example of getting user information from sam. */
-  @Override
-  public ResponseEntity<String> getMessage() {
-    var user = getUser();
-    return ResponseEntity.of(
-        this.exampleService.getExampleForUser(user.getSubjectId()).map(Example::message));
-  }
-
-  @Override
-  public ResponseEntity<Void> setMessage(String body) {
-    var user = getUser();
-    this.exampleService.saveExample(new Example(user.getSubjectId(), body));
-    return ResponseEntity.noContent().build();
   }
 
   /** Example of getting the bearer token and using it to make a Sam (or other service) api call */
