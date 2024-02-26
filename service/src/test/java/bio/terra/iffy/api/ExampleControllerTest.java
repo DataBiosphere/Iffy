@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import bio.terra.common.iam.BearerToken;
@@ -16,12 +14,10 @@ import bio.terra.common.iam.SamUserFactory;
 import bio.terra.iffy.config.SamConfiguration;
 import bio.terra.iffy.controller.ExampleController;
 import bio.terra.iffy.iam.SamService;
-import bio.terra.iffy.model.Example;
 import bio.terra.iffy.service.ExampleService;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,25 +48,6 @@ public class ExampleControllerTest {
   @BeforeEach
   void beforeEach() {
     when(samUserFactoryMock.from(any(HttpServletRequest.class), any())).thenReturn(testUser);
-  }
-
-  @Test
-  void testGetMessageOk() throws Exception {
-    var example = new Example(testUser.getSubjectId(), "message");
-    when(serviceMock.getExampleForUser(testUser.getSubjectId())).thenReturn(Optional.of(example));
-
-    mockMvc
-        .perform(get("/api/example/v1/message"))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(content().string(example.message()));
-  }
-
-  @Test
-  void testGetMessageNotFound() throws Exception {
-    when(serviceMock.getExampleForUser(testUser.getSubjectId())).thenReturn(Optional.empty());
-
-    mockMvc.perform(get("/api/example/v1/message")).andExpect(status().isNotFound());
   }
 
   @Test

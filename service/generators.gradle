@@ -39,6 +39,6 @@ gitProperties {
     keys = []
     customProperty('iffy.version.gitTag', { it.describe(tags: true) })
     customProperty('iffy.version.gitHash', { it.head().abbreviatedId })
-    customProperty('iffy.version.github', { "https://github.com/DataBiosphere/terra-java-project-template/tree/${it.describe(tags: true)}" })
+    customProperty('iffy.version.github', { "https://github.com/DataBiosphere/iffy/tree/${it.describe(tags: true)}" })
     customProperty('iffy.version.build', version)
 }

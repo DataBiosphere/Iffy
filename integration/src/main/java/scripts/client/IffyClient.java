@@ -28,8 +28,7 @@ public class IffyClient extends ApiClient {
    * @param server the server we are testing against
    * @param testUser the test user whose credentials are supplied to the API client object
    */
-  public IffyClient(ServerSpecification server, TestUserSpecification testUser)
-      throws IOException {
+  public IffyClient(ServerSpecification server, TestUserSpecification testUser) throws IOException {
     // note that this uses server.catalogUri. Typically a uri for a new service needs to be added to
     // https://github.com/DataBiosphere/terra-test-runner/blob/main/src/main/java/bio/terra/testrunner/runner/config/ServerSpecification.java
     // but for this template we will stick with catalog

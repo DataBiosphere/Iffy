@@ -2,12 +2,6 @@
 # This is for deployment-specific values, which may be managed by other teams
 
 env:
-  db:
-    host: ${DATABASE_HOSTNAME:127.0.0.1}:5432
-    init: ${INIT_DB:false}
-    name: ${DATABASE_NAME:iffy_db}
-    password: ${DATABASE_USER_PASSWORD:dbpwd}
-    user: ${DATABASE_USER:dbuser}
   tracing:
     exportEnabled: ${CLOUD_TRACE_ENABLED:false}
     samplingRate: ${SAMPLING_PROBABILITY:0}
@@ -36,14 +30,6 @@ spring:
   # https://github.com/DataBiosphere/terra-common-lib/blob/480ab3daae282ddff0fef8dc329494a4422e32f1/src/main/java/bio/terra/common/logging/GoogleJsonLayout.java#L118
   application.name: iffy
   application.version: ${iffy.version.gitHash:unknown}
-
-  datasource:
-    hikari:
-      connection-timeout: 5000
-      maximum-pool-size: 8 # cpu count * 2 https://kwahome.medium.com/database-connections-less-is-more-86c406b6fad
-    password: ${env.db.password}
-    url: jdbc:postgresql://${env.db.host}/${env.db.name}
-    username: ${env.db.user}
 
   web:
     resources:
@@ -95,4 +81,4 @@ otel:
       attributes:
         service:
           name: ${spring.application.name}
-          version: ${javatemplate.version.gitTag:unknown}
+          version: ${iffy.version.gitTag:unknown}
