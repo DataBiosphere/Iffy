@@ -95,4 +95,4 @@ otel:
       attributes:
         service:
           name: ${spring.application.name}
-          version: ${javatemplate.version.gitTag:unknown}
+          version: ${iffy.version.gitTag:unknown}
