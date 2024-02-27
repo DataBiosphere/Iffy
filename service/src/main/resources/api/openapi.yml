@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Iffy
-  description: Iffy
+  description: A proof-of-concept feature flag service for Terra
   version: 0.0.1
 paths:
   /status:
@@ -36,87 +36,153 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
-  # README /docs/api_versioning.md
-  /api/example/v1/message:
-    get:
-      summary: Gets your message
-      tags: [ example ]
-      operationId: getMessage
-      responses:
-        '200':
-          description: Your message
-          content:
-            application/json:
-              schema:
-                type: string
-        '404':
-          description: You don't have a message
-        '500':
-          $ref: '#/components/responses/ServerError'
+  # Flag Evaluation methods
+  /api/flag/v1/evaluateBool/{flagName}:
     post:
-      summary: Stores your message
-      tags: [ example ]
-      operationId: setMessage
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              type: string
-        required: true
-      responses:
-        '204':
-          description: Message saved
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /api/example/v1/{resourceType}/{resourceId}/{action}:
-    get:
-      summary: Checks sam access
-      tags: [ example ]
-      operationId: getAction
+      summary: Evaluates a boolean feature flag
+      tags: [ flag ]
+      operationId: evaluateBool
       parameters:
-        - name: resourceType
+        - name: flagName
           in: path
           required: true
           schema:
             type: string
-        - name: resourceId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: action
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/EvaluationRequest'
       responses:
         '200':
-          description: action access
-          content:
-            application/json:
-              schema:
-                type: boolean
+          $ref: '#/components/responses/EvaluationResponseBool'
+        '404':
+          description: Flag not found
         '500':
           $ref: '#/components/responses/ServerError'
-  /api/example/v1/counter:
+  /api/flag/v1/evaluateInteger/{flagName}:
     post:
-      summary: increment a metrics counter
-      tags: [ example ]
-      operationId: incrementCounter
+      summary: Evaluates an integer feature flag
+      tags: [ flag ]
+      operationId: evaluateInteger
+      parameters:
+        - name: flagName
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: tag for counter
-        content:
-          application/json:
-            schema:
-              type: string
+        $ref: '#/components/requestBodies/EvaluationRequest'
       responses:
-        '204':
-          description: success
+        '200':
+          $ref: '#/components/responses/EvaluationResponseInteger'
+        '404':
+          description: Flag not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/flag/v1/evaluateDouble/{flagName}:
+    post:
+      summary: Evaluates a double feature flag
+      tags: [ flag ]
+      operationId: evaluateDouble
+      parameters:
+        - name: flagName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/EvaluationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EvaluationResponseDouble'
+        '404':
+          description: Flag not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/flag/v1/evaluateString/{flagName}:
+    post:
+      summary: Evaluates a string feature flag
+      tags: [ flag ]
+      operationId: evaluateString
+      parameters:
+        - name: flagName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/EvaluationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EvaluationResponseString'
+        '404':
+          description: Flag not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/flag/v1/evaluateObject/{flagName}:
+    post:
+      summary: Evaluates an object-typed feature flag
+      tags: [ flag ]
+      operationId: evaluateObject
+      parameters:
+        - name: flagName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/EvaluationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EvaluationResponseObject'
+        '404':
+          description: Flag not found
         '500':
           $ref: '#/components/responses/ServerError'
 
 components:
+  # Flag Evaluation Requests
+  requestBodies:
+    EvaluationRequest:
+      description: A request for a feature flag evaluation
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EvaluationRequest'
+
   responses:
+    # Flag Evaluation Responses
+    EvaluationResponseBool:
+      description: A response for the evaluation of a boolean feature flag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EvaluationResultBool'
+    EvaluationResponseInteger:
+      description: A response for the evaluation of an integer feature flag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EvaluationResultInteger'
+    EvaluationResponseDouble:
+      description: A response for the evaluation of a double feature flag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EvaluationResultDouble'
+    EvaluationResponseString:
+      description: A response for the evaluation of a string feature flag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EvaluationResultString'
+    EvaluationResponseObject:
+      description: A response for the evaluation of an object-typed feature flag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EvaluationResultObject'
+
+    # Status Responses
     SystemStatusResponse:
       description: A JSON description of the subsystems and their statuses.
       content:
@@ -151,6 +217,95 @@ components:
             $ref: '#/components/schemas/ErrorReport'
 
   schemas:
+    EvaluationRequest:
+      description: Common fields for a flag evaluation request
+      type: object
+      required: [ context ]
+      properties:
+        context:
+          $ref: '#/components/schemas/EvaluationContext'
+
+    EvaluationContext:
+      description: Client-supplied context for a flag evaluation. Arbitrary JSON data
+      type: object
+      additionalProperties: true
+
+    EvaluationResultBool:
+      description: Result of a boolean feature flag evaluation
+      allOf:
+        - $ref: '#/components/schemas/EvaluationResult'
+        - type: object
+          description: Value of the evaluation
+          required: [ value ]
+          properties:
+            value:
+              type: boolean
+
+    EvaluationResultInteger:
+      description: Result of an integer feature flag evaluation
+      allOf:
+        - $ref: '#/components/schemas/EvaluationResult'
+        - type: object
+          description: Value of the evaluation
+          required: [ value ]
+          properties:
+            value:
+              type: integer
+              format: int32
+
+    EvaluationResultDouble:
+      description: Result of a double feature flag evaluation
+      allOf:
+        - $ref: '#/components/schemas/EvaluationResult'
+        - type: object
+          description: Value of the evaluation
+          required: [ value ]
+          properties:
+            value:
+              type: number
+              format: double
+
+    EvaluationResultString:
+      description: Result of a string feature flag evaluation
+      allOf:
+        - $ref: '#/components/schemas/EvaluationResult'
+        - type: object
+          description: Value of the evaluation
+          required: [ value ]
+          properties:
+            value:
+              type: string
+
+    EvaluationResultObject:
+      description: Result of an object-typed feature flag evaluation
+      allOf:
+        - $ref: '#/components/schemas/EvaluationResult'
+        - type: object
+          description: Value of the evaluation
+          required: [ value ]
+          properties:
+            value:
+              type: object
+              additionalProperties: true
+
+    EvaluationResult:
+      description: Common fields for the result for a feature flag evaluation
+      type: object
+      required: [ variant, reason ]
+      properties:
+        reason:
+          $ref: '#/components/schemas/EvaluationReason'
+        variant:
+          $ref: '#/components/schemas/VariantName'
+
+    VariantName:
+      description: Name of the flag variant that was matched
+      type: string
+
+    EvaluationReason:
+      description: Describes why the flag was evaluated to given variant
+      type: string
+
     ErrorReport:
       type: object
       required: [ message, statusCode ]
