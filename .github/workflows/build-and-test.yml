@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ '**' ]
 
+env:
+  SERVICE_NAME: ${{ github.event.repository.name }}
+  GOOGLE_PROJECT: broad-dsp-gcr-public
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -50,19 +54,6 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Construct docker image name and tag
-        id: image-name
-        run: |
-          GITHUB_REPO=$(basename ${{ github.repository }})
-          GIT_SHORT_HASH=$(git rev-parse --short HEAD)
-          echo "name=${GITHUB_REPO}:${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
-
-      - name: Build image locally with jib
-        run: |
-          ./gradlew --build-cache :service:jibDockerBuild \
-            --image=${{ steps.image-name.outputs.name }} \
-            -Djib.console=plain
-
       - name: Auth to Google
         uses: google-github-actions/auth@v1
         with:
@@ -77,7 +68,15 @@ jobs:
 
       - name: Construct docker image name and tag
         id: image-name
-        run: echo "name=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:{{ steps.image-name.outputs.name }}" >> $GITHUB_OUTPUT
+        run: |
+          GIT_SHORT_HASH=$(git rev-parse --short HEAD)
+          echo "name=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
+
+      - name: Build image locally with jib
+        run: |
+          ./gradlew --build-cache :service:jibDockerBuild \
+            --image=${{ steps.image-name.outputs.name }} \
+            -Djib.console=plain
 
       - name: Push GCR image
         run: docker push ${{ steps.image-name.outputs.name }}
