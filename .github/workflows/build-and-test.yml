@@ -73,7 +73,9 @@ jobs:
         id: image-name
         run: |
           GIT_SHORT_HASH=$(git rev-parse --short HEAD)
-          echo "name=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
+          FLOATER="${{ github.head_ref || github.ref_name }}"
+          echo "name=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
+          echo "floating-tag=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:${FLOATER}" >> $GITHUB_OUTPUT
 
       - name: Build image locally with jib
         run: |
@@ -82,7 +84,9 @@ jobs:
             -Djib.console=plain
 
       - name: Push GCR image
-        run: docker push ${{ steps.image-name.outputs.name }}
+        run: |
+          docker tag ${{ steps.image-name.outputs.name }} ${{ steps.image-name.outputs.floating-tag }}
+          docker push ${{ steps.image-name.outputs.name }}
 
   dispatch-trivy:
     needs: [ build ]
