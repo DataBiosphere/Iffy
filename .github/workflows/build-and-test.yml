@@ -72,10 +72,11 @@ jobs:
       - name: Construct docker image name and tag
         id: image-name
         run: |
+          REPO="gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}"
           GIT_SHORT_HASH=$(git rev-parse --short HEAD)
           FLOATER="${{ github.head_ref || github.ref_name }}"
-          echo "name=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
-          echo "floating-tag=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:${FLOATER}" >> $GITHUB_OUTPUT
+          echo "name=${REPO}:${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
+          echo "floating-tag=${REPO}:${FLOATER}" >> $GITHUB_OUTPUT
 
       - name: Build image locally with jib
         run: |
@@ -86,7 +87,8 @@ jobs:
       - name: Push GCR image
         run: |
           docker tag ${{ steps.image-name.outputs.name }} ${{ steps.image-name.outputs.floating-tag }}
-          docker push ${{ steps.image-name.outputs.name }} --all-tags
+          docker push ${{ steps.image-name.outputs.name }}
+          docker push ${{ steps.image-name.outputs.floating-tag }}
 
   dispatch-trivy:
     needs: [ build ]
