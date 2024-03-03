@@ -138,7 +138,7 @@ jobs:
     # This calculation of workflow completion/status is handled by dsp-devops internal tooling. Reach out in #dsp-devops-champions if you have questions
     needs: [test-env]
     uses: broadinstitute/sherlock/.github/workflows/client-report-workflow.yaml@main
-    # with:
+    with:
       # Channels to notify upon workflow success or failure
       # notify-slack-channels-upon-workflow-completion: '#dsp-feature-flags,#dsde-qa'
 
