@@ -86,7 +86,7 @@ jobs:
       - name: Push GCR image
         run: |
           docker tag ${{ steps.image-name.outputs.name }} ${{ steps.image-name.outputs.floating-tag }}
-          docker push ${{ steps.image-name.outputs.name }}
+          docker push ${{ steps.image-name.outputs.name }} --all-tags
 
   dispatch-trivy:
     needs: [ build ]
