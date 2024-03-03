@@ -1,0 +1,134 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "show-welcome-banner": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          {
+            "$ref": "emailIsChelseaPersonal"
+          },
+          "on",
+          {
+            "fractional": [
+              {
+                "var": "subjectId"
+              },
+              [
+                "on",
+                5
+              ],
+              [
+                "off",
+                95
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "foobar-thread-pool-size": {
+      "state": "ENABLED",
+      "variants": {
+        "small": 1024,
+        "large": 2048,
+        "extra-large": 4096
+      },
+      "defaultVariant": "small"
+    },
+    "widget-metric-sampling-rate": {
+      "state": "ENABLED",
+      "variants": {
+        "1-percent": 0.01,
+        "20-percent": 0.20,
+        "100-percent": 1.0
+      },
+      "defaultVariant": "20-percent",
+      "targeting": {
+        "fractional": [
+          { "var": "subjectId" },
+          ["1-percent", 95],
+          ["20-percent", 4],
+          ["100-percent", 1]
+        ]
+      }
+    },
+    "background-color": {
+      "state": "ENABLED",
+      "variants": {
+        "red": "#FF0000",
+        "blue": "#0000FF",
+        "green": "#00FF00",
+        "yellow": "#FFFF00"
+      },
+      "defaultVariant": "red",
+      "targeting": {
+        "if": [
+          {
+            "$ref": "emailIsChelseaPersonal"
+          },
+          "blue",
+          null
+        ]
+      }
+    },
+    "chelsea-app-profiles-experiment": {
+      "state": "ENABLED",
+      "variants": {
+        "wide": {
+          "replicas": 6,
+          "ram": "512Mib",
+          "cpu": 0.5
+        },
+        "tall": {
+          "replicas": 1,
+          "ram": "4GiB",
+          "cpu": 3
+        },
+        "regular": {
+          "replicas": 2,
+          "ram": "1Gib",
+          "cpu": 1
+        }
+      },
+      "defaultVariant": "regular",
+      "targeting": {
+        "if": [
+          {
+            "$ref": "emailIsChelseaPersonal"
+          },
+          "tall",
+          {
+            "if": [
+              {
+                "in": [
+                  "gmail.com",
+                  {
+                    "var": ["email"]
+                  }
+                ]
+              },
+              "wide",
+              null
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "$evaluators": {
+    "emailIsChelseaPersonal": {
+      "in": [
+        "chelseahoover@gmail.com",
+        {
+          "var": ["email"]
+        }
+      ]
+    }
+  }
+}

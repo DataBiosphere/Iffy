@@ -49,6 +49,11 @@ management:
         include: "*"
 
 iffy:
+  flagd:
+    host: localhost
+    port: 8013
+    timeoutMilliseconds: 5000
+
   ingress:
     # Default value that's overridden by Helm.
     domainName: localhost:8080

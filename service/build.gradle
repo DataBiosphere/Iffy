@@ -19,11 +19,14 @@ dependencies {
     implementation 'org.springframework:spring-aspects'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.retry:spring-retry'
-    implementation 'org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-2cd8969'
+    implementation 'org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-afe6a89'
     implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus:1.10.4'
+
+    // Required for core Iffy service features
+    implementation 'dev.openfeature.contrib.providers:flagd:0.6.9'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
