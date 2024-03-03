@@ -63,6 +63,25 @@ jobs:
             --image=${{ steps.image-name.outputs.name }} \
             -Djib.console=plain
 
+      - name: Auth to Google
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: projects/1038484894585/locations/global/workloadIdentityPools/github-wi-pool/providers/github-wi-provider
+          service_account: gcr-publish@broad-dsp-gcr-public.iam.gserviceaccount.com
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Explicitly auth Docker for GCR
+        run: gcloud auth configure-docker --quiet
+
+      - name: Construct docker image name and tag
+        id: image-name
+        run: echo "name=gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:{{ steps.image-name.outputs.name }}" >> $GITHUB_OUTPUT
+
+      - name: Push GCR image
+        run: docker push ${{ steps.image-name.outputs.name }}
+
   dispatch-trivy:
     needs: [ build ]
     runs-on: ubuntu-latest
@@ -207,7 +226,7 @@ jobs:
         with:
           workflow: Tag
           token: ${{ secrets.BROADBOT_TOKEN }}
-  
+
 
   # report workflow status in slack
   # see https://docs.google.com/document/d/1G6-whnNJvON6Qq1b3VvRJFC7M9M-gu2dAVrQHDyp9Us/edit?usp=sharing
