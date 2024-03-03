@@ -47,29 +47,29 @@ public class FlagControllerTest {
   @Test
   @Disabled("TODO")
   void testIncrementCounter() throws Exception {
-//    var meterRegistry = new SimpleMeterRegistry();
-//    Metrics.globalRegistry.add(meterRegistry);
-//
-//    try {
-//      final String tagValue = "tag_value";
-//      mockMvc
-//          .perform(
-//              post("/api/example/v1/counter")
-//                  .contentType(MediaType.APPLICATION_JSON)
-//                  .content(tagValue))
-//          .andExpect(status().isNoContent());
-//
-//      var counter =
-//          meterRegistry
-//              .find(FlagController.)
-//              .tags(FlagController.EXAMPLE_COUNTER_TAG, tagValue)
-//              .counter();
-//
-//      assertNotNull(counter);
-//      assertEquals(counter.count(), 1);
-//
-//    } finally {
-//      Metrics.globalRegistry.remove(meterRegistry);
-//    }
+    //    var meterRegistry = new SimpleMeterRegistry();
+    //    Metrics.globalRegistry.add(meterRegistry);
+    //
+    //    try {
+    //      final String tagValue = "tag_value";
+    //      mockMvc
+    //          .perform(
+    //              post("/api/example/v1/counter")
+    //                  .contentType(MediaType.APPLICATION_JSON)
+    //                  .content(tagValue))
+    //          .andExpect(status().isNoContent());
+    //
+    //      var counter =
+    //          meterRegistry
+    //              .find(FlagController.)
+    //              .tags(FlagController.EXAMPLE_COUNTER_TAG, tagValue)
+    //              .counter();
+    //
+    //      assertNotNull(counter);
+    //      assertEquals(counter.count(), 1);
+    //
+    //    } finally {
+    //      Metrics.globalRegistry.remove(meterRegistry);
+    //    }
   }
 }
