@@ -138,6 +138,34 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/flag/v1/evaluateAll:
+    post:
+      summary: Evaluates all features for a given context
+      tags: [ flag ]
+      operationId: evaluateAll
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/EvaluationRequest'
+      responses:
+        '200':
+          description: "Map of evaluation results"
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Map of evaluation results
+                additionalProperties:
+                  oneOf:
+                    - $ref: '#/components/schemas/EvaluationResultBool'
+                    - $ref: '#/components/schemas/EvaluationResultString'
+                    - $ref: '#/components/schemas/EvaluationResultInteger'
+                    - $ref: '#/components/schemas/EvaluationResultDouble'
+                    - $ref: '#/components/schemas/EvaluationResultObject'
+        '404':
+          description: Not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+
 components:
   # Flag Evaluation Requests
   requestBodies:

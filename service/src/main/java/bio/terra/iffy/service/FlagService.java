@@ -106,6 +106,57 @@ public class FlagService {
         () -> this.doEvaluateObject(flagName, ctx));
   }
 
+  public Map<String, EvaluationResult> evaluateAllForContext(Map<String, Object> ctx) {
+    Schema.ResolveAllRequest request =
+        Schema.ResolveAllRequest.newBuilder().setContext(mapToStruct(ctx)).build();
+
+    Schema.ResolveAllResponse response = this.flagdService.resolveAll(request);
+
+    Map<String, EvaluationResult> result = new HashMap<>();
+    for (Map.Entry<String, Schema.AnyFlag> entry : response.getFlagsMap().entrySet()) {
+      String flagName = entry.getKey();
+      Schema.AnyFlag flagValue = entry.getValue();
+
+      logger.warn(
+          "parsing flag evaluation result for "
+              + flagName
+              + "("
+              + flagValue.getValueCase().name()
+              + ")");
+
+      EvaluationResult r;
+
+      if (flagValue.hasBoolValue()) {
+        EvaluationResultBool b = new EvaluationResultBool();
+        b.setValue(flagValue.getBoolValue());
+        r = b;
+      } else if (flagValue.hasDoubleValue()) {
+        EvaluationResultDouble d = new EvaluationResultDouble();
+        d.setValue(flagValue.getDoubleValue());
+        r = d;
+      } else if (flagValue.hasStringValue()) {
+        EvaluationResultString s = new EvaluationResultString();
+        s.setValue(flagValue.getStringValue());
+        r = s;
+      } else if (flagValue.hasObjectValue()) {
+        EvaluationResultObject o = new EvaluationResultObject();
+        o.setValue(structToMap(flagValue.getObjectValue()));
+        r = o;
+      } else {
+        // TODO make a real error type
+        throw new RuntimeException("Unrecognized flag type: " + flagValue.getValueCase().name());
+      }
+
+      r.setVariant(flagValue.getVariant());
+      r.setReason(flagValue.getReason());
+
+      result.put(flagName, r);
+    }
+
+    // TODO instrument request
+    return result;
+  }
+
   private EvaluationResultBool doEvaluateBool(String flagName, Map<String, Object> ctx) {
     Schema.ResolveBooleanRequest request =
         Schema.ResolveBooleanRequest.newBuilder()
