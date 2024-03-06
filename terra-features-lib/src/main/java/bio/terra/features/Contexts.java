@@ -19,12 +19,7 @@ public class Contexts {
     ctx.add(
         "user",
         Structure.mapToStructure(
-            Map.of(
-                "email",
-                samUser.getEmail(),
-                "id",
-                samUser.getSubjectId()
-                )));
+            Map.of("email", samUser.getEmail(), "id", samUser.getSubjectId())));
     ctx.setTargetingKey(samUser.getSubjectId());
     return ctx;
   }

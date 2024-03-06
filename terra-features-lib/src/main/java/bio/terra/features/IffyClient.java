@@ -3,9 +3,8 @@ package bio.terra.features;
 import bio.terra.iffy.api.FlagApi;
 import bio.terra.iffy.client.ApiClient;
 import io.opentelemetry.api.OpenTelemetry;
-import java.util.Optional;
 import jakarta.ws.rs.client.Client;
-
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component

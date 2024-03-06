@@ -31,6 +31,7 @@ public class IffyProvider implements FeatureProvider {
     public IffyProviderException(Exception cause) {
       super(cause);
     }
+
     public IffyProviderException(String message, Throwable e) {
       super(message, e);
     }
@@ -166,7 +167,8 @@ public class IffyProvider implements FeatureProvider {
     try {
       contextWithToken = (EvaluationContextWithBearerToken) ctx;
     } catch (ClassCastException e) {
-      String message = "all contexts passed to IffyProvider must be an EvaluationContextWithBearerToken";
+      String message =
+          "all contexts passed to IffyProvider must be an EvaluationContextWithBearerToken";
       logger.error(message, e);
       throw new IffyProviderException(message, e);
     }
