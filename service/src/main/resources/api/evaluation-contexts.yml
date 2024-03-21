@@ -7,7 +7,6 @@ paths: {}
 components:
   schemas:
     UserV1Context:
-      x-is-evaluation-context: true
       x-schema-kind: "user"
       x-schema-version: "v1"
       description: Evaluation context for a Terra user (V1)
@@ -24,7 +23,6 @@ components:
           example: b.adm@gmail.com
 
     SystemV1Context:
-      x-is-evaluation-context: true
       x-schema-kind: "system"
       x-schema-version: "v1"
       description: Evaluation context providing information about the calling system
@@ -57,7 +55,6 @@ components:
               example: "1.2.3"
 
     CustomV1Context:
-      x-is-evaluation-context: true
       x-schema-kind: "custom"
       x-schema-version: "v1"
       description: Evaluation context providing information about the calling system
