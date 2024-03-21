@@ -7,6 +7,8 @@ env:
     samplingRate: ${SAMPLING_PROBABILITY:0}
   sam:
     basePath: ${SAM_ADDRESS:https://sam.dsde-dev.broadinstitute.org}
+  ingress:
+    domainName: ${IFFY_INGRESS_DOMAIN_NAME:localhost:8080}
 
 # Below here is non-deployment-specific
 
@@ -49,9 +51,14 @@ management:
         include: "*"
 
 iffy:
+  flagd:
+    host: localhost
+    port: 8013
+    timeoutMilliseconds: 5000
+
   ingress:
     # Default value that's overridden by Helm.
-    domainName: localhost:8080
+    domainName: ${env.ingress.domainName}
 
   status-check:
     enabled: true

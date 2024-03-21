@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ '**' ]
 
+env:
+  SERVICE_NAME: ${{ github.event.repository.name }}
+  GOOGLE_PROJECT: broad-dsp-gcr-public
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,6 +44,9 @@ jobs:
   jib:
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
       - uses: actions/checkout@v3
@@ -50,18 +57,38 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Auth to Google
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: projects/1038484894585/locations/global/workloadIdentityPools/github-wi-pool/providers/github-wi-provider
+          service_account: gcr-publish@broad-dsp-gcr-public.iam.gserviceaccount.com
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Explicitly auth Docker for GCR
+        run: gcloud auth configure-docker --quiet
+
       - name: Construct docker image name and tag
         id: image-name
         run: |
-          GITHUB_REPO=$(basename ${{ github.repository }})
+          REPO="gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}"
           GIT_SHORT_HASH=$(git rev-parse --short HEAD)
-          echo "name=${GITHUB_REPO}:${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
+          FLOATER="${{ github.head_ref || github.ref_name }}"
+          echo "name=${REPO}:${GIT_SHORT_HASH}" >> $GITHUB_OUTPUT
+          echo "floating-tag=${REPO}:${FLOATER}" >> $GITHUB_OUTPUT
 
       - name: Build image locally with jib
         run: |
           ./gradlew --build-cache :service:jibDockerBuild \
             --image=${{ steps.image-name.outputs.name }} \
             -Djib.console=plain
+
+      - name: Push GCR image
+        run: |
+          docker tag ${{ steps.image-name.outputs.name }} ${{ steps.image-name.outputs.floating-tag }}
+          docker push ${{ steps.image-name.outputs.name }}
+          docker push ${{ steps.image-name.outputs.floating-tag }}
 
   dispatch-trivy:
     needs: [ build ]
@@ -207,13 +234,13 @@ jobs:
         with:
           workflow: Tag
           token: ${{ secrets.BROADBOT_TOKEN }}
-  
+
 
   # report workflow status in slack
   # see https://docs.google.com/document/d/1G6-whnNJvON6Qq1b3VvRJFC7M9M-gu2dAVrQHDyp9Us/edit?usp=sharing
   report-workflow:
     uses: broadinstitute/sherlock/.github/workflows/client-report-workflow.yaml@main
-    with:
+    # with:
       # Channels to notify upon workflow success or failure
       # notify-slack-channels-upon-workflow-completion: '#dsp-feature-flags'
 

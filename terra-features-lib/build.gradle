@@ -1,0 +1,44 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'bio.terra.java-library-conventions'
+    id 'maven-publish'
+    id 'com.srcclr.gradle'
+    id 'io.spring.dependency-management'
+    id 'com.jfrog.artifactory' version '5.0.3'
+}
+
+apply plugin: 'idea'
+idea {
+    module {
+        downloadJavadoc = true
+    }
+}
+
+
+dependencyManagement {
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
+}
+
+apply from: 'artifactory.gradle'
+
+dependencies {
+    implementation 'bio.terra:terra-common-lib'
+    implementation 'dev.openfeature:sdk:1.7.3'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    implementation project(':client')
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '3.2.3'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+}
+
+test {
+    useJUnitPlatform ()
+}
+
+srcclr {
+    scope = 'runtimeClasspath'
+}
