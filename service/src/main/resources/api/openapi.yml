@@ -334,6 +334,15 @@ components:
       description: Describes why the flag was evaluated to given variant
       type: string
 
+    UserV1Context:
+      $ref: "./evaluation-contexts.yml#/components/schemas/UserV1Context"
+
+    SystemV1Context:
+      $ref: "./evaluation-contexts.yml#/components/schemas/SystemV1Context"
+
+    CustomV1Context:
+      $ref: "./evaluation-contexts.yml#/components/schemas/CustomV1Context"
+
     ErrorReport:
       type: object
       required: [ message, statusCode ]
